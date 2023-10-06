@@ -3,19 +3,29 @@ const templateCard = document.querySelector("#card-template").content;
 // @todo: DOM узлы
 const placeList = document.querySelector(".places__list");
 const profileInfo = document.querySelector(".profile__info");
-const buttonCardAdd = document.querySelector(".profile__add-button");
-const popupProfEdit = document.querySelector(".popup_type_edit");
+const profileInfoTitle = profileInfo.querySelector(".profile__title")
+const profileInfoDescription = profileInfo.querySelector(".profile__description")
+const buttonOpenPopupCardAdd = document.querySelector(".profile__add-button");
+const popupProfileEdit = document.querySelector(".popup_type_edit");
 const popupCardNew = document.querySelector(".popup_type_new-card");
-const popupCardImage = document.querySelector(".popup_type_image");
+const popupImage = document.querySelector(".popup_type_image");
+const popupImageCard = popupImage.querySelector(".popup__image");
 
 const formCardNew = popupCardNew.querySelector(".popup__form");
-const formProfileEdit = popupProfEdit.querySelector(".popup__form");
+const formProfileEdit = popupProfileEdit.querySelector(".popup__form");
 
-const buttonPopupEdit = document.querySelector(".profile__edit-button");
-const buttonsPopupClose = document.querySelectorAll(".popup__close");
+const buttonOpenPopupProfile = document.querySelector(".profile__edit-button");
+const buttonsClosePopup = document.querySelectorAll(".popup__close");
 
-// @todo: Функция создания карточки
-const addCard = (cardContent, deleteCard, position = "down") => {
+const openPopup = (popup) => {
+  popup.classList.add("popup_is-opened");
+};
+
+const closePopup = (popup) => {
+  popup.classList.remove("popup_is-opened");
+};
+
+const createCard = (cardContent, deleteCard) => {
   const card = templateCard.querySelector(".card").cloneNode(true);
   const cardImage = card.querySelector(".card__image");
   const cardTitle = card.querySelector(".card__title");
@@ -23,10 +33,9 @@ const addCard = (cardContent, deleteCard, position = "down") => {
   const buttonLike = card.querySelector(".card__like-button");
 
   cardImage.addEventListener("click", () => {
-    const popupImage = popupCardImage.querySelector(".popup__image");
-    popupImage.src = cardContent.link;
-    popupImage.alt = cardContent.name;
-    popupCardImage.classList.add("popup_is-opened");
+    popupImageCard.src = cardContent.link;
+    popupImageCard.alt = cardContent.name;
+    openPopup(popupImage);
   });
 
   buttonDelete.addEventListener("click", deleteCard);
@@ -37,6 +46,11 @@ const addCard = (cardContent, deleteCard, position = "down") => {
   cardImage.src = cardContent.link;
   cardImage.alt = cardContent.name;
   cardTitle.textContent = cardContent.name;
+
+  return card;
+};
+
+const renderCard = (card, position) => {
   if (position === "down") {
     placeList.append(card);
   } else {
@@ -44,24 +58,27 @@ const addCard = (cardContent, deleteCard, position = "down") => {
   }
 };
 
+// @todo: Функция создания карточки
+const addCard = (cardContent, deleteCard, position = "down") => {
+  renderCard(createCard(cardContent, deleteCard), position);
+};
+
 // @todo: Функция удаления карточки
 const deleteCard = (event) => {
   event.target.parentElement.remove();
 };
 
-buttonPopupEdit.addEventListener("click", () => {
-  popupProfEdit.classList.add("popup_is-opened");
+buttonOpenPopupProfile.addEventListener("click", () => {
+  openPopup(popupProfileEdit);
 });
 
-buttonCardAdd.addEventListener("click", () => {
-  popupCardNew.classList.add("popup_is-opened");
+buttonOpenPopupCardAdd.addEventListener("click", () => {
+  openPopup(popupCardNew);
 });
 
-buttonsPopupClose.forEach((button) => {
+buttonsClosePopup.forEach((button) => {
   button.addEventListener("click", (event) => {
-    event.target.parentElement.parentElement.classList.remove(
-      "popup_is-opened"
-    );
+    closePopup(event.target.closest('.popup'));
   });
 });
 
@@ -82,7 +99,7 @@ formCardNew.onsubmit = (event) => {
       return result;
     }, {});
   addCard(data, deleteCard, "up");
-  event.target.parentElement.parentElement.classList.remove("popup_is-opened");
+  closePopup(popupCardNew);
 };
 
 // Submit формы профиля
@@ -102,10 +119,10 @@ formProfileEdit.onsubmit = (event) => {
       return result;
     }, {});
 
-  profileInfo.querySelector(".profile__title").textContent = data.name;
-  profileInfo.querySelector(".profile__description").textContent =
+  profileInfoTitle.textContent = data.name;
+  profileInfoDescription.textContent =
     data.description;
-  event.target.parentElement.parentElement.classList.remove("popup_is-opened");
+  closePopup(popupProfileEdit);
 };
 
 // @todo: Вывести карточки на страницу
