@@ -1,4 +1,4 @@
-export const initialOpenForm = (form, data) => {
+export const fillFormData = (form, data) => {
   if (form && data && Object.keys(data).length > 0) {
     Object.keys(data).forEach((name) => {
       if (form.elements[name]) form.elements[name].value = data[name];
