@@ -54,7 +54,8 @@ formCardNew.addEventListener('submit', (event) => {
     handleCardImageClick,
     'up'
   );
-  fillFormData(event.target, { name: null, link: null });
+  // fillFormData(event.target, { name: null, link: null });
+  event.target.reset();
   closePopup(popupCardNew);
 });
 
