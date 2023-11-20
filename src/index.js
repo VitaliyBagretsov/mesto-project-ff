@@ -1,41 +1,55 @@
 import { openPopup, closePopup } from './components/modal';
 import {
-  initialCards,
   addCard,
   handleCardDelete,
   handleCardLike,
   handleCardImageClick,
 } from './components/cards';
-import { fillFormData, getFormData } from './components/form';
-
+import { fillFormData } from './components/form';
+import { enableValidation } from './components/validation';
+import { getUserProfile, getCardList } from './components/api';
+import {
+  userProfileStore,
+  getUserProfileLocal,
+  renderUserProfileLocal,
+} from './components/profile';
+import {
+  submitCardNew,
+  submitCardDelete,
+  submitProfileEdit,
+  submitAvatarEdit,
+} from './components/submit';
 import './pages/index.css';
 
-// @todo: DOM узлы
-const profileInfo = document.querySelector('.profile__info');
-const profileInfoTitle = profileInfo.querySelector('.profile__title');
-const profileInfoDescription = profileInfo.querySelector(
-  '.profile__description'
-);
+// DOM узлы
 const buttonOpenPopupCardAdd = document.querySelector('.profile__add-button');
 const popupProfileEdit = document.querySelector('.popup_type_edit');
+const popupAvatarEdit = document.querySelector('.popup_type_edit-avatar');
 const popupCardNew = document.querySelector('.popup_type_new-card');
 
 const formProfileEdit = document.forms['edit-profile'];
+const formAvatarEdit = document.forms['edit-avatar'];
 const formCardNew = document.forms['new-place'];
+const formCardDelete = document.forms['delete-card-place'];
 
 const buttonOpenPopupProfile = document.querySelector('.profile__edit-button');
+const buttonOpenPopupAvatar = document.querySelector('.profile__image');
 const buttonsClosePopup = document.querySelectorAll('.popup__close');
 
 buttonOpenPopupProfile.addEventListener('click', () => {
   openPopup(popupProfileEdit);
-  fillFormData(formProfileEdit, {
-    name: profileInfoTitle.textContent,
-    description: profileInfoDescription.textContent,
-  });
+  fillFormData(formProfileEdit, getUserProfileLocal());
+  enableValidation(formProfileEdit);
+});
+
+buttonOpenPopupAvatar.addEventListener('click', () => {
+  openPopup(popupAvatarEdit);
+  enableValidation(formAvatarEdit);
 });
 
 buttonOpenPopupCardAdd.addEventListener('click', () => {
   openPopup(popupCardNew);
+  enableValidation(formCardNew);
 });
 
 buttonsClosePopup.forEach((button) => {
@@ -45,30 +59,31 @@ buttonsClosePopup.forEach((button) => {
 });
 
 // Submit формы новой карточки
-formCardNew.addEventListener('submit', (event) => {
-  event.preventDefault();
-  addCard(
-    getFormData(event.target),
-    handleCardDelete,
-    handleCardLike,
-    handleCardImageClick,
-    'up'
-  );
-  // fillFormData(event.target, { name: null, link: null });
-  event.target.reset();
-  closePopup(popupCardNew);
-});
-
+formCardNew.addEventListener('submit', submitCardNew);
+// submit удаления карточки места
+formCardDelete.addEventListener('submit', submitCardDelete);
 // Submit формы профиля
-formProfileEdit.addEventListener('submit', (event) => {
-  event.preventDefault();
-  const data = getFormData(event.target);
-  profileInfoTitle.textContent = data.name;
-  profileInfoDescription.textContent = data.description;
-  closePopup(popupProfileEdit);
-});
+formProfileEdit.addEventListener('submit', submitProfileEdit);
+// Submit формы аватрки
+formAvatarEdit.addEventListener('submit', submitAvatarEdit);
 
-// @todo: Вывести карточки на страницу
-initialCards.forEach((item) =>
-  addCard(item, handleCardDelete, handleCardLike, handleCardImageClick)
+const userProfilePromise = getUserProfile('me');
+const cardListPromise = getCardList();
+
+Promise.all([userProfilePromise, cardListPromise]).then(
+  ([userProfile, cardList]) => {
+    // Запомнить и заполнить профиль пользователя
+    Object.entries(userProfile).forEach(([key, value]) => {
+      userProfileStore[key] = value;
+    });
+    renderUserProfileLocal(
+      userProfile.name,
+      userProfile.about,
+      userProfile.avatar
+    );
+    // Вывести карточки на страницу
+    cardList.forEach((item) => {
+      addCard(item, handleCardDelete, handleCardLike, handleCardImageClick);
+    });
+  }
 );

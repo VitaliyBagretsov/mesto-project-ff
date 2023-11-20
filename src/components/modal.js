@@ -1,3 +1,8 @@
+import {
+  enableValidation,
+  clearValidation,
+} from './validation';
+
 let popupOpen; //помним открытый popup
 
 //Закрываем popup по клику внещней области popup
@@ -22,5 +27,8 @@ export const closePopup = (popup) => {
 
   popup.removeEventListener('click', handleOverlay);
   document.removeEventListener('keydown', handleEscapeKey);
+  const form = popup.querySelector('.popup__form');
+  if (form) clearValidation(form); //отключение listener и валидации при закрытии формы
+
   popupOpen = undefined;
 };
