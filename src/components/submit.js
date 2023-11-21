@@ -3,9 +3,9 @@ import {
   addCard,
   handleCardDelete,
   handleCardLike,
-  handleCardImageClick,
+  // handleCardImageClick,
   deleteCard,
-} from './cards';
+} from './card';
 import { getFormData } from './form';
 import {
   createCardServer,
@@ -29,7 +29,7 @@ const toggleLoadStatus = (form) => {
 };
 
 // Submit формы новой карточки
-export const submitCardNew = (event) => {
+export const submitCardNew = (event, handleCardImageClick) => {
   event.preventDefault();
   const popup = event.target.closest('.popup');
   toggleLoadStatus(event.target);
@@ -40,14 +40,15 @@ export const submitCardNew = (event) => {
         handleCardDelete,
         handleCardLike,
         handleCardImageClick,
+        data.owner._id,
         'up'
       );
+      closePopup(popup);
+      event.target.reset();
     })
     .catch((err) => alert(err))
     .finally(() => {
       toggleLoadStatus(event.target);
-      closePopup(popup);
-      event.target.reset();
     });
 };
 
@@ -72,13 +73,16 @@ export const submitProfileEdit = (event) => {
   toggleLoadStatus(event.target);
   updateUserProfile('me', data.name, data.description)
     .then((updateData) => {
-      renderUserProfileLocal(updateData.name, updateData.about);
+      renderUserProfileLocal({
+        name: updateData.name,
+        about: updateData.about,
+      });
+      closePopup(popup);
+      event.target.reset();
     })
     .catch((err) => alert(err))
     .finally(() => {
       toggleLoadStatus(event.target);
-      closePopup(popup);
-      event.target.reset();
     });
 };
 
@@ -90,16 +94,16 @@ export const submitAvatarEdit = (event) => {
   toggleLoadStatus(event.target);
   updateUserAvatar('me', data.link)
     .then((updateData) => {
-      renderUserProfileLocal(
-        updateData.name,
-        updateData.about,
-        updateData.avatar
-      );
+      renderUserProfileLocal({
+        name: updateData.name,
+        about: updateData.about,
+        avatar: updateData.avatar,
+      });
+      closePopup(popup);
+      event.target.reset();
     })
     .catch((err) => alert(err))
     .finally(() => {
       toggleLoadStatus(event.target);
-      closePopup(popup);
-      event.target.reset();
     });
 };

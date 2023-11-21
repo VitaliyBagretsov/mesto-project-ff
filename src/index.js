@@ -1,15 +1,9 @@
 import { openPopup, closePopup } from './components/modal';
-import {
-  addCard,
-  handleCardDelete,
-  handleCardLike,
-  handleCardImageClick,
-} from './components/cards';
+import { addCard, handleCardDelete, handleCardLike } from './components/card';
 import { fillFormData } from './components/form';
-import { enableValidation } from './components/validation';
+import { clearValidation, enableValidation } from './components/validation';
 import { getUserProfile, getCardList } from './components/api';
 import {
-  userProfileStore,
   getUserProfileLocal,
   renderUserProfileLocal,
 } from './components/profile';
@@ -20,6 +14,14 @@ import {
   submitAvatarEdit,
 } from './components/submit';
 import './pages/index.css';
+
+const validationConfig = {
+  formSelector: '.popup__form',
+  inputSelector: '.popup__input',
+  submitButtonSelector: '.popup__button',
+  inputErrorClass: 'popup__input_type_error',
+  errorClass: 'popup__input-error_active',
+};
 
 // DOM узлы
 const buttonOpenPopupCardAdd = document.querySelector('.profile__add-button');
@@ -32,6 +34,10 @@ const formAvatarEdit = document.forms['edit-avatar'];
 const formCardNew = document.forms['new-place'];
 const formCardDelete = document.forms['delete-card-place'];
 
+const popupImage = document.querySelector('.popup_type_image');
+const popupImageCard = popupImage.querySelector('.popup__image');
+const popupImageCaption = popupImage.querySelector('.popup__caption');
+
 const buttonOpenPopupProfile = document.querySelector('.profile__edit-button');
 const buttonOpenPopupAvatar = document.querySelector('.profile__image');
 const buttonsClosePopup = document.querySelectorAll('.popup__close');
@@ -39,17 +45,19 @@ const buttonsClosePopup = document.querySelectorAll('.popup__close');
 buttonOpenPopupProfile.addEventListener('click', () => {
   openPopup(popupProfileEdit);
   fillFormData(formProfileEdit, getUserProfileLocal());
-  enableValidation(formProfileEdit);
+  clearValidation(formProfileEdit, validationConfig);
 });
 
 buttonOpenPopupAvatar.addEventListener('click', () => {
   openPopup(popupAvatarEdit);
-  enableValidation(formAvatarEdit);
+  formAvatarEdit.reset();
+  clearValidation(formAvatarEdit, validationConfig);
 });
 
 buttonOpenPopupCardAdd.addEventListener('click', () => {
   openPopup(popupCardNew);
-  enableValidation(formCardNew);
+  formCardNew.reset();
+  clearValidation(formCardNew, validationConfig);
 });
 
 buttonsClosePopup.forEach((button) => {
@@ -58,8 +66,19 @@ buttonsClosePopup.forEach((button) => {
   });
 });
 
+//handle Функция открытия карточки
+const handleCardImageClick = (event) => {
+  popupImageCard.src = event.target.src;
+  popupImageCard.alt = event.target.alt;
+  popupImageCaption.textContent = event.target.alt;
+  openPopup(popupImage);
+};
+
 // Submit формы новой карточки
-formCardNew.addEventListener('submit', submitCardNew);
+//(callback усложненн, чтобы не делать export функции в нисходящий модуль)
+formCardNew.addEventListener('submit', (event) => {
+  submitCardNew(event, handleCardImageClick);
+});
 // submit удаления карточки места
 formCardDelete.addEventListener('submit', submitCardDelete);
 // Submit формы профиля
@@ -72,18 +91,22 @@ const cardListPromise = getCardList();
 
 Promise.all([userProfilePromise, cardListPromise]).then(
   ([userProfile, cardList]) => {
-    // Запомнить и заполнить профиль пользователя
-    Object.entries(userProfile).forEach(([key, value]) => {
-      userProfileStore[key] = value;
+    renderUserProfileLocal({
+      name: userProfile.name,
+      about: userProfile.about,
+      avatar: userProfile.avatar,
     });
-    renderUserProfileLocal(
-      userProfile.name,
-      userProfile.about,
-      userProfile.avatar
-    );
     // Вывести карточки на страницу
     cardList.forEach((item) => {
-      addCard(item, handleCardDelete, handleCardLike, handleCardImageClick);
+      addCard(
+        item,
+        handleCardDelete,
+        handleCardLike,
+        handleCardImageClick,
+        userProfile._id
+      );
     });
   }
 );
+
+enableValidation(validationConfig);

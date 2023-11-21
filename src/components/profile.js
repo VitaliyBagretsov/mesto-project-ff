@@ -1,7 +1,5 @@
 import { getUserProfile } from './api';
 
-export const userProfileStore = {};
-
 // DOM-элементы профиля
 const profileImage = document.querySelector('.profile__image');
 const profileInfo = document.querySelector('.profile__info');
@@ -16,10 +14,10 @@ export const fillProfile = () => {
   });
 };
 
-export const renderUserProfileLocal = (name, about, avatar) => {
-  if (name) profileInfoTitle.textContent = name;
-  if (about) profileInfoDescription.textContent = about;
-  if (avatar) profileImage.style.backgroundImage = `url(${avatar})`;
+export const renderUserProfileLocal = (userInfo) => {
+  if (userInfo.name) profileInfoTitle.textContent = userInfo.name;
+  if (userInfo.about) profileInfoDescription.textContent = userInfo.about;
+  if (userInfo.avatar) profileImage.style.backgroundImage = `url(${userInfo.avatar})`;
 };
 
 export const getUserProfileLocal = () => {

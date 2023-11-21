@@ -1,19 +1,19 @@
-const showInputError = (formElement, inputElement, errorMessage) => {
+const showInputError = (formElement, inputElement, errorMessage, config) => {
   const errorElement = formElement.querySelector(`.${inputElement.id}-error`);
-  inputElement.classList.add('popup__input_type_error');
+  inputElement.classList.add(config.inputErrorClass);
+  errorElement.classList.add(config.errorClass);
   errorElement.textContent = errorMessage;
-  errorElement.classList.add('popup__input-error_active');
 };
 
-const hideInputError = (formElement, inputElement) => {
+const hideInputError = (formElement, inputElement, config) => {
   const errorElement = formElement.querySelector(`.${inputElement.id}-error`);
-  inputElement.classList.remove('popup__input_type_error');
-  errorElement.classList.remove('popup__input-error_active');
+  inputElement.classList.remove(config.inputErrorClass);
+  errorElement.classList.remove(config.errorClass);
   errorElement.textContent = '';
 };
 
 //валидация значения input
-export const checkInputValidity = (formElement, inputElement) => {
+export const checkInputValidity = (formElement, inputElement, config) => {
   if (inputElement.validity.patternMismatch) {
     inputElement.setCustomValidity(inputElement.dataset.errorPatternMessage);
   } else {
@@ -21,9 +21,14 @@ export const checkInputValidity = (formElement, inputElement) => {
   }
 
   if (!inputElement.validity.valid) {
-    showInputError(formElement, inputElement, inputElement.validationMessage);
+    showInputError(
+      formElement,
+      inputElement,
+      inputElement.validationMessage,
+      config
+    );
   } else {
-    hideInputError(formElement, inputElement);
+    hideInputError(formElement, inputElement, config);
   }
 };
 
@@ -34,37 +39,39 @@ const hasInvalidInput = (inputList) => {
 };
 
 const toggleButtonState = (inputList, buttonElement) => {
-  if (hasInvalidInput(inputList)) {
-    buttonElement.disabled = true;
-  } else {
-    buttonElement.disabled = false;
-  }
+  buttonElement.disabled = hasInvalidInput(inputList);
 };
 
-//handle продублирована для возможности отключения listener
-const handleCheckInputValidity = (event) => {
-  const form = event.target.closest('.popup__form');
-  checkInputValidity(form, event.target);
-  toggleButtonState(
-    Array.from(form.querySelectorAll('.popup__input')),
-    form.querySelector('.popup__button')
+//установить listener валидации на input формы
+export const enableValidation = (config) => {
+  const formList = Array.from(document.querySelectorAll(config.formSelector));
+  formList.forEach((formElement) => {
+    const inputList = Array.from(
+      formElement.querySelectorAll(config.inputSelector)
+    );
+    inputList.forEach((inputElement) => {
+      inputElement.addEventListener('input', () => {
+        checkInputValidity(formElement, inputElement, config);
+        toggleButtonState(
+          inputList,
+          formElement.querySelector(config.submitButtonSelector)
+        );
+      });
+    });
+  });
+};
+
+//Очистка ошибок валидации формы
+export const clearValidation = (formElement, config) => {
+  const inputList = Array.from(
+    formElement.querySelectorAll(config.inputSelector)
   );
-};
-
-//установить listener на input формы
-export const enableValidation = (formElement) => {
-  const inputList = Array.from(formElement.querySelectorAll('.popup__input'));
   inputList.forEach((inputElement) => {
-    checkInputValidity(formElement, inputElement);
-    toggleButtonState(inputList, formElement.querySelector('.popup__button'));
-    inputElement.addEventListener('input', handleCheckInputValidity);
+    hideInputError(formElement, inputElement, config);
   });
-};
 
-//удалить listener с input формы
-export const clearValidation = (formElement) => {
-  const inputList = Array.from(formElement.querySelectorAll('.popup__input'));
-  inputList.forEach((inputElement) => {
-    inputElement.removeEventListener('input', handleCheckInputValidity);
-  });
+  toggleButtonState(
+    inputList,
+    formElement.querySelector(config.submitButtonSelector)
+  );
 };

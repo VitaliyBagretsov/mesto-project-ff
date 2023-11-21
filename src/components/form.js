@@ -9,13 +9,8 @@ export const fillFormData = (form, data) => {
 export const getFormData = (form) => {
   return Array.from(form.elements)
     .filter((item) => !!item.name)
-    .map((element) => {
-      const { name, value } = element;
-      return { name, value };
-    })
     .reduce((prev, curr) => {
-      const result = { ...prev };
-      result[curr.name] = curr.value;
-      return result;
+      prev[curr.name] = curr.value;
+      return prev;
     }, {});
 };

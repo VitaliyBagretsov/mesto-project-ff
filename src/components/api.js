@@ -16,15 +16,13 @@ const resolve = (res) => {
   }
 };
 
-export const getUserProfile = async (userId) => {
+export const getUserProfile = (userId) => {
   return fetch(`${config.baseUrl}/users/${userId}`, {
     headers: config.headers,
-  })
-    .then(resolve)
-    .catch((err) => alert(err));
+  }).then(resolve);
 };
 
-export const updateUserProfile = async (userId, name, about) => {
+export const updateUserProfile = (userId, name, about) => {
   return fetch(`${config.baseUrl}/users/${userId}`, {
     method: 'PATCH',
     headers: config.headers,
@@ -32,27 +30,21 @@ export const updateUserProfile = async (userId, name, about) => {
       name,
       about,
     }),
-  })
-    .then(resolve)
-    .catch((err) => alert(err));
+  }).then(resolve);
 };
 
-export const updateUserAvatar = async (userId, avatar) => {
+export const updateUserAvatar = (userId, avatar) => {
   return fetch(`${config.baseUrl}/users/${userId}/avatar`, {
     method: 'PATCH',
     headers: config.headers,
     body: JSON.stringify({ avatar }),
-  })
-    .then(resolve)
-    .catch((err) => alert(err));
+  }).then(resolve);
 };
 
-export const getCardList = async () => {
+export const getCardList = () => {
   return fetch(`${config.baseUrl}/cards`, {
     headers: config.headers,
-  })
-    .then(resolve)
-    .catch((err) => alert(err));
+  }).then(resolve);
 };
 
 export const createCardServer = (content) => {
@@ -63,32 +55,26 @@ export const createCardServer = (content) => {
       name: content.name,
       link: content.link,
     }),
-  })
-    .then(resolve)
-    .catch((err) => alert(err));
+  }).then(resolve);
 };
 
 export const deleteCardServer = (cardId) => {
   return fetch(`${config.baseUrl}/cards/${cardId}`, {
     method: 'DELETE',
     headers: config.headers,
-  }).catch((err) => alert(err));
+  });
 };
 
 export const likeCardServer = (cardId) => {
   return fetch(`${config.baseUrl}/cards/likes/${cardId}`, {
     method: 'PUT',
     headers: config.headers,
-  })
-    .then(resolve)
-    .catch((err) => alert(err));
+  }).then(resolve);
 };
 
 export const dislikeCardServer = (cardId) => {
   return fetch(`${config.baseUrl}/cards/likes/${cardId}`, {
     method: 'DELETE',
     headers: config.headers,
-  })
-    .then(resolve)
-    .catch((err) => alert(err));
+  }).then(resolve);
 };
